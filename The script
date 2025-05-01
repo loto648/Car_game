@@ -1,0 +1,231 @@
+import pygame
+import random
+
+pygame.font.init()
+FPS = 140
+width = 900
+height = 900
+red = (255, 0, 0)
+green = (0, 150, 0)
+purple = (90, 0, 120)
+white = (255, 255, 255)
+darkgreen = (51, 102, 51)
+grassgreen = (102, 255, 102)
+grey = (105, 105, 105)
+lightgrey = (178, 178, 178)
+black = (0, 0, 0)
+orange = (229, 153, 0)
+Lgreen = (196, 255, 0)
+dred = (111, 0, 0)
+sored = (172, 0, 0)
+
+back_btn = pygame.Rect(700, 800, 300, 100)
+play_btn = pygame.Rect(650, 400, 250, 100)
+newcar_btn = pygame.Rect(650, 500, 250, 100)
+EXIT_btn = pygame.Rect(650, 600, 250, 100)
+MENU_btn = pygame.Rect(650, 800, 250, 50)
+change1_btn = pygame.Rect(270, 50, 150, 40)
+pause_btn = pygame.Rect(700, 800, 300, 100)
+restart_btn = pygame.Rect(80, 150, 200, 400)
+
+Car1 = pygame.image.load("pickup_truck.png")
+Car2 = Car1.get_rect()
+Car2.x = 436
+Car2.y = 600
+Car3 = pygame.image.load("pickup_truck.png")
+Car4 = Car3.get_rect()
+Car4.x = 100
+Car4.y = 100
+Car5 = pygame.image.load("taxi.png")
+Car6 = Car5.get_rect()
+car7 = pygame.image.load("car above.png")
+car8 = car7.get_rect()
+
+direction = "stop"
+backg = pygame.image.load("image.2.png")
+back1 = backg.get_rect()
+back1_x = width
+back1_y = height
+y = 0
+x = 0
+tree = pygame.image.load("tree11.png")
+tree1 = tree.get_rect()
+tree1.x = 700
+tree1.y = 300
+
+speed = 0
+frame_count = 1
+x_block = width
+y_block = random.choice([20, 120])
+
+# NEW: Score tracking variables
+distance = 0
+score = 0
+high_score = 0
+
+road1 = []
+for i in range(10, height, 100):
+    road1.append([370, i, 10, 50])
+
+road2 = []
+for i in range(10, height, 100):
+    road2.append([520, i, 10, 50])
+
+random1 = random.randint(275, 571)
+ry = 0
+re = pygame.Rect(random1, ry, 50, 70)
+
+window = pygame.display.set_mode((width, height))
+clock = pygame.time.Clock()
+run = True
+gamemode = "menu"
+
+while run:
+    if gamemode == "menu":
+        window.blit(backg, back1)
+        for i in pygame.event.get():
+            if i.type == pygame.QUIT:
+                run = False
+            elif i.type == pygame.MOUSEBUTTONDOWN:
+                if play_btn.collidepoint(i.pos):
+                    gamemode = "game"
+                    distance = 0
+                    score = 0
+
+                if newcar_btn.collidepoint(i.pos):
+                    gamemode = "cars"
+
+                if EXIT_btn.collidepoint(i.pos):
+                    quit()
+
+        pygame.draw.rect(window, green, play_btn)
+        pygame.draw.rect(window, orange, newcar_btn)
+        pygame.draw.rect(window, red, EXIT_btn)
+        font_sytle1 = pygame.font.SysFont("arial", 60)
+        window.blit(font_sytle1.render("PLAY", True, white), (657, 414))
+        window.blit(font_sytle1.render("Cars", True, white), (660, 510))
+        window.blit(font_sytle1.render("Leave", True, white), (665, 608))
+
+    if gamemode == "game":
+        window.fill(grassgreen)
+        pygame.draw.rect(window, grey, (210, 0, 500, height))
+        pygame.draw.rect(window, lightgrey, (170, 0, 70, height))
+        pygame.draw.rect(window, lightgrey, (650, 0, 70, height))
+        pygame.draw.rect(window, white, (0, 694, 170, 40))
+        font_sytle1 = pygame.font.SysFont("arial", 30)
+        window.blit(font_sytle1.render("Score:", True, black), (0, 694))
+        window.blit(Car1, (Car2.x - 10, Car2.y))
+
+        for i in pygame.event.get():
+            if i.type == pygame.QUIT:
+                run = False
+            elif i.type == pygame.KEYDOWN:
+                if i.key == pygame.K_RIGHT:
+                    direction = "RIGHT"
+                elif i.key == pygame.K_LEFT:
+                    direction = "LEFT"
+            elif i.type == pygame.KEYUP:
+                direction = "stop"
+
+        for i in road1:
+            i[1] = i[1] + 2 if i[1] <= height else 0
+            pygame.draw.rect(window, white, i)
+
+        for i in road2:
+            i[1] = i[1] + 2 if i[1] <= height else 0
+            pygame.draw.rect(window, white, i)
+
+        if re.y > height:
+            re.y = 1
+            re.x = random.randint(275, 571)
+        else:
+            re.y += 2
+
+        window.blit(Car5, re)
+
+        # Score and distance update
+        distance += 2
+        score = distance // 10
+
+        # Show score
+        font_sytle = pygame.font.SysFont("arial", 60)
+        score_label = font_sytle.render(f"Score: {score}", True, black)
+        window.blit(score_label, (20, 20))
+
+        if Car2.colliderect(re):
+            gamemode = "GameOver"
+            boom = pygame.image.load("boom.png")
+            window.blit(boom, re)
+
+        if direction == "LEFT":
+            Car2.x -= 3
+        elif direction == "RIGHT":
+            Car2.x += 3
+
+        pygame.draw.rect(window, grey, (750, 0, 140, 50))
+        font_sytle11 = pygame.font.SysFont("arial", 40)
+        window.blit(font_sytle11.render("PAUSE", True, white), (750, 0))
+
+    if gamemode == "cars":
+        window.fill(grey)
+        for i in pygame.event.get():
+            if i.type == pygame.QUIT:
+                run = False
+            elif i.type == pygame.MOUSEBUTTONDOWN:
+                if back_btn.collidepoint(i.pos):
+                    gamemode = "menu"
+
+        window.blit(Car3, Car4)
+        pygame.draw.rect(window, orange, (80, 50, 150, 40))
+        pygame.draw.rect(window, green, (270, 50, 150, 40))
+        Car9 = pygame.image.load("semi_trailer.png")
+        Car10 = Car9.get_rect()
+        Car10.x = 300
+        Car10.y = 100
+        window.blit(Car9, Car10)
+        pygame.draw.rect(window, red, (700, 800, 300, 100))
+        font_sytle8 = pygame.font.SysFont("arial", 60)
+        window.blit(font_sytle8.render("Back", True, white), (730, 810))
+
+    if gamemode == "GameOver":
+        # Update high score
+        if score > high_score:
+            high_score = score
+
+        for i in pygame.event.get():
+            if i.type == pygame.QUIT:
+                run = False
+            elif i.type == pygame.MOUSEBUTTONDOWN:
+                if MENU_btn.collidepoint(i.pos):
+                    gamemode = "menu"
+                if restart_btn.collidepoint(i.pos):
+                    gamemode = "game"
+                    distance = 0
+                    score = 0
+
+        pygame.draw.rect(window, green, restart_btn)
+        pygame.draw.rect(window, green, MENU_btn)
+        font_sytle9 = pygame.font.SysFont("arial", 40)
+        window.blit(font_sytle9.render("Back To Menu", True, black), (650, 800))
+
+        pygame.draw.rect(window, red, (0, 100, 900, 260))
+        font_sytle10 = pygame.font.SysFont("arial", 80)
+        window.blit(font_sytle10.render("GAME OVER", True, dred), (210, 200))
+        window.blit(font_sytle10.render("GAME OVER", True, sored), (215, 205))
+
+        # Display final score and high score
+        score_font = pygame.font.SysFont("arial", 50)
+        window.blit(score_font.render(f"Score: {score}", True, black), (300, 300))
+        window.blit(score_font.render(f"High Score: {high_score}", True, black), (300, 360))
+
+    if gamemode == "pause":
+        window.fill(grey)
+        for i in pygame.event.get():
+            if i.type == pygame.QUIT:
+                run = False
+            pygame.draw.rect(window, red, (100, 100, 100, 100))
+
+    pygame.display.update()
+    clock.tick(FPS)
+
+pygame.quit()
